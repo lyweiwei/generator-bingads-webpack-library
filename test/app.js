@@ -6,14 +6,19 @@ var helpers = require('yeoman-generator').test;
 describe('generator-bingads-webpack-library:app', function () {
   before(function (done) {
     helpers.run(path.join(__dirname, '../generators/app'))
-      .withOptions({someOption: true})
-      .withPrompts({someAnswer: true})
+      .withPrompts({
+        name: 'test-library',
+      })
       .on('end', done);
   });
 
   it('creates files', function () {
     assert.file([
-      'dummyfile.txt'
+      'package.json',
+      '.gitignore',
+      'gulpfile.js',
+      'webpack.config.js',
+      'js/index.js',
     ]);
   });
 });
