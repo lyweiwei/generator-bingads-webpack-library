@@ -39,9 +39,9 @@ module.exports = yeoman.generators.Base.extend({
       default: '',
     }, {
       type: 'input',
-      name: 'main',
+      name: 'entry',
       message: 'Main entry',
-      default: 'js/index.js',
+      default: './js/index.js',
     }, {
       type: 'input',
       name: 'authorName',
@@ -76,7 +76,7 @@ module.exports = yeoman.generators.Base.extend({
       _.defaults({
         name: this.props.name,
         description: this.props.description,
-        main: this.props.main,
+        main: 'dist/' + this.props.name + '.js',
         keywords: _.chain(this.props.keywords).split(',').compact().uniq().value(),
         eslintConfig: pkg.eslintConfig,
         author: {
