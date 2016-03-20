@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublish": "gulp prepublish"
+  },
+  "license": "MIT"
+}

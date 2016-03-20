@@ -1,6 +1,6 @@
 {
   "name": "generator-bingads-webpack-library",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Yeoman generator to initiate a library using webpack for BingAds",
   "homepage": "https://ms-wewei.visualstudio.com/DefaultCollection/bingads-oss/_git/generator-bingads-webpack-library",
   "author": {
@@ -20,8 +20,10 @@
     "yeoman-generator"
   ],
   "dependencies": {
-    "yeoman-generator": "^0.21.1",
     "chalk": "^1.0.0",
+    "lodash": "^4.6.1",
+    "walk": "^2.3.9",
+    "yeoman-generator": "^0.21.1",
     "yosay": "^1.0.2"
   },
   "devDependencies": {
@@ -41,7 +43,18 @@
   "eslintConfig": {
     "extends": "xo-space",
     "env": {
-      "mocha": true
+      "mocha": true,
+      "amd": true
+    },
+    "rules": {
+      "comma-dangle": [
+        2,
+        "always-multiline"
+      ],
+      "object-curly-spacing": [
+        2,
+        "always"
+      ]
     }
   },
   "repository": "https://ms-wewei.visualstudio.com/DefaultCollection/bingads-oss/_git/generator-bingads-webpack-library",
