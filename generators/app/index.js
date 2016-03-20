@@ -74,8 +74,8 @@ module.exports = yeoman.generators.Base.extend({
     this.fs.writeJSON(
       this.destinationPath('package.json'),
       _.defaults({
-        name: this.appname,
-        description: this.props.version,
+        name: this.props.name,
+        description: this.props.description,
         main: this.props.main,
         keywords: _.chain(this.props.keywords).split(',').compact().uniq().value(),
         eslintConfig: pkg.eslintConfig,
