@@ -10,10 +10,7 @@ module.exports = {
     'eslint',
     'eslint-config-xo',
     'eslint-config-xo-space',
-    // Karma 0.13.19 - 0.13.22,
-    // Issue 1788, Karma 0.13.19 taking long time to complete when run via gulp
-    // https://github.com/karma-runner/karma/issues/1788
-    'karma@0.13.18',
+    'karma',
     'karma-mocha',
     'karma-mocha-reporter',
     'karma-coverage',
