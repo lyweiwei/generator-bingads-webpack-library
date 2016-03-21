@@ -6,8 +6,8 @@ var yosay = require('yosay');
 var _ = require('lodash');
 var walk = require('walk');
 var path = require('path');
-var pkg = require('../../package');
-var pkgStaticDest = require('./package.static');
+var pkgGenerator = require('../../package');
+var pkgStaticSrc = require('./package.static');
 
 function getSuggestedModuleName(originalName) {
   return _.chain(originalName)
@@ -21,6 +21,7 @@ function getSuggestedModuleName(originalName) {
 module.exports = yeoman.generators.Base.extend({
   prompting: function () {
     var done = this.async();
+    var pkgDest = this.pkgDest = this.fs.readJSON(this.destinationPath('package.json'), {});
 
     // Have Yeoman greet the user.
     this.log(yosay(
@@ -31,12 +32,12 @@ module.exports = yeoman.generators.Base.extend({
       type: 'input',
       name: 'name',
       message: 'Library name',
-      default: getSuggestedModuleName(this.appname),
+      default: pkgDest.name || getSuggestedModuleName(this.appname),
     }, {
       type: 'input',
       name: 'description',
       message: 'Description',
-      default: '',
+      default: pkgDest.description || '',
     }, {
       type: 'input',
       name: 'entry',
@@ -46,17 +47,38 @@ module.exports = yeoman.generators.Base.extend({
       type: 'input',
       name: 'authorName',
       message: 'Author\'s Name',
-      default: this.user.git.name(),
+      default: function () {
+        return _.find([
+          _.result(pkgDest, 'author.name'),
+          _.isString(pkgDest.author) && pkgDest.author,
+          this.user.git.name(),
+        ]) || '';
+      }.bind(this),
     }, {
       type: 'input',
       name: 'authorEmail',
       message: 'Author\'s Email',
-      default: this.user.git.email(),
+      default: function (props) {
+        if (props.authorName === _.result(pkgDest, 'author.name')) {
+          return _.result(pkgDest, 'author.email', '');
+        }
+        return this.user.git.email() || '';
+      }.bind(this),
+    }, {
+      type: 'input',
+      name: 'authorURL',
+      message: 'Author\'s URL',
+      default: function (props) {
+        if (props.authorName === _.result(pkgDest, 'author.name')) {
+          return _.result(pkgDest, 'author.url', '');
+        }
+        return '';
+      },
     }, {
       type: 'input',
       name: 'keywords',
       message: 'Keywords(comma to split)',
-      default: '',
+      default: pkgDest.keywords || '',
     }];
 
     this.prompt(prompts, function (props) {
@@ -71,20 +93,23 @@ module.exports = yeoman.generators.Base.extend({
     var done = this.async();
     var pathTemplateRoot = this.templatePath();
 
-    this.fs.writeJSON(
-      this.destinationPath('package.json'),
-      _.defaults({
-        name: this.props.name,
-        description: this.props.description,
-        main: 'dist/' + this.props.name + '.js',
-        keywords: _.chain(this.props.keywords).split(',').compact().uniq().value(),
-        eslintConfig: pkg.eslintConfig,
-        author: {
-          name: this.props.authorName,
-          email: this.props.authorEmail,
-        },
-      }, pkgStaticDest)
-    );
+    _.extend(this.pkgDest, {
+      name: this.props.name,
+      description: this.props.description,
+      keywords: _.chain(this.props.keywords).split(',').compact().uniq().value(),
+      author: {
+        name: this.props.authorName,
+        email: this.props.authorEmail || undefined,
+        url: this.props.authorURL || undefined,
+      },
+    });
+
+    _.defaults(this.pkgDest, {
+      main: 'dist/' + this.props.name + '.js',
+      eslintConfig: pkgGenerator.eslintConfig,
+    }, pkgStaticSrc);
+
+    this.fs.writeJSON(this.destinationPath('package.json'), this.pkgDest);
 
     walk.walk(pathTemplateRoot, {
       listeners: {
@@ -113,6 +138,8 @@ module.exports = yeoman.generators.Base.extend({
       'webpack-stream',
       'requirejs',
       'gulp',
+      'gulp-eslint',
+      'gulp-exclude-gitignore',
       'eslint',
       'eslint-config-xo',
       'eslint-config-xo-space',
