@@ -1,0 +1,14 @@
+{
+  "dev":[
+    "underscore",
+    "webpack",
+    "webpack-stream",
+    "requirejs",
+    "gulp",
+    "gulp-eslint",
+    "gulp-exclude-gitignore",
+    "eslint",
+    "eslint-config-xo",
+    "eslint-config-xo-space"
+  ]
+}

@@ -8,6 +8,7 @@ var walk = require('walk');
 var path = require('path');
 var pkgGenerator = require('../../package');
 var pkgStaticSrc = require('./package.static');
+var dependencies = require('./dependencies');
 
 function getSuggestedModuleName(originalName) {
   return _.chain(originalName)
@@ -134,18 +135,7 @@ module.exports = yeoman.generators.Base.extend({
   },
 
   install: function () {
-    this.npmInstall([
-      'underscore',
-      'webpack',
-      'webpack-stream',
-      'requirejs',
-      'gulp',
-      'gulp-eslint',
-      'gulp-exclude-gitignore',
-      'eslint',
-      'eslint-config-xo',
-      'eslint-config-xo-space',
-    ], {
+    this.npmInstall(dependencies.dev, {
       saveDev: true,
       link: true,
     });
