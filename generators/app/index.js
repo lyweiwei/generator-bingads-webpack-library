@@ -61,6 +61,8 @@ module.exports = yeoman.generators.Base.extend({
       default: function (props) {
         if (props.authorName === _.result(pkgDest, 'author.name')) {
           return _.result(pkgDest, 'author.email', '');
+        } else if (props.authorName === pkgDest.author) {
+          return '';
         }
         return this.user.git.email() || '';
       }.bind(this),
