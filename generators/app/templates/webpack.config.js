@@ -21,7 +21,7 @@ function getExternals() {
 }
 
 module.exports = {
-  entry: path.resolve('<%= entry %>'),
+  entry: path.resolve('./js/index.js'),
   output: {
     path: path.join(__dirname, 'dist'),
     filename: '<%= name %>.js',

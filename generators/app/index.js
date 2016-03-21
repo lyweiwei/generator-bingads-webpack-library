@@ -41,11 +41,6 @@ module.exports = yeoman.generators.Base.extend({
       default: pkgDest.description || '',
     }, {
       type: 'input',
-      name: 'entry',
-      message: 'Main entry',
-      default: './js/index.js',
-    }, {
-      type: 'input',
       name: 'authorName',
       message: 'Author\'s Name',
       default: function () {
