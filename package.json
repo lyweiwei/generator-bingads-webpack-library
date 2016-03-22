@@ -41,23 +41,6 @@
     "gulp-plumber": "^1.0.0",
     "yeoman-assert": "^2.0.0"
   },
-  "eslintConfig": {
-    "extends": "xo-space",
-    "env": {
-      "mocha": true,
-      "amd": true
-    },
-    "rules": {
-      "comma-dangle": [
-        2,
-        "always-multiline"
-      ],
-      "object-curly-spacing": [
-        2,
-        "always"
-      ]
-    }
-  },
   "repository": "https://ms-wewei.visualstudio.com/DefaultCollection/bingads-oss/_git/generator-bingads-webpack-library",
   "scripts": {
     "prepublish": "gulp prepublish",

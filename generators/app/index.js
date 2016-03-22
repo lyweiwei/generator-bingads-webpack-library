@@ -6,7 +6,6 @@ var yosay = require('yosay');
 var _ = require('lodash');
 var walk = require('walk');
 var path = require('path');
-var pkgGenerator = require('../../package');
 var pkgStaticSrc = require('./package.static');
 var dependencies = require('./dependencies');
 
@@ -104,7 +103,6 @@ module.exports = yeoman.generators.Base.extend({
 
     _.defaults(this.pkgDest, {
       main: 'dist/' + this.props.name + '.js',
-      eslintConfig: pkgGenerator.eslintConfig,
     }, pkgStaticSrc);
 
     this.fs.writeJSON(this.destinationPath('package.json'), this.pkgDest);
@@ -115,11 +113,12 @@ module.exports = yeoman.generators.Base.extend({
           var rootRel = path.relative(pathTemplateRoot, root);
 
           _.forEach(nodeNamesArray, function (name) {
-            var pathRel = path.join(rootRel, name);
+            var pathRelSrc = path.join(rootRel, name);
+            var pathRelDst = path.join(rootRel, name.replace(/^_/, '.'));
 
             this.fs.copyTpl(
-              this.templatePath(pathRel),
-              this.destinationPath(pathRel.replace(/^_/, '.')),
+              this.templatePath(pathRelSrc),
+              this.destinationPath(pathRelDst),
               this.props
             );
           }.bind(this));
