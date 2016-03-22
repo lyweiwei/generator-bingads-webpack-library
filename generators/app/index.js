@@ -109,19 +109,17 @@ module.exports = yeoman.generators.Base.extend({
 
     walk.walk(pathTemplateRoot, {
       listeners: {
-        names: function (root, nodeNamesArray) {
+        file: function (root, fileStats, next) {
           var rootRel = path.relative(pathTemplateRoot, root);
+          var pathRelSrc = path.join(rootRel, fileStats.name);
+          var pathRelDst = path.join(rootRel, fileStats.name.replace(/^_/, '.'));
 
-          _.forEach(nodeNamesArray, function (name) {
-            var pathRelSrc = path.join(rootRel, name);
-            var pathRelDst = path.join(rootRel, name.replace(/^_/, '.'));
-
-            this.fs.copyTpl(
-              this.templatePath(pathRelSrc),
-              this.destinationPath(pathRelDst),
-              this.props
-            );
-          }.bind(this));
+          this.fs.copyTpl(
+            this.templatePath(pathRelSrc),
+            this.destinationPath(pathRelDst),
+            this.props
+          );
+          next();
         }.bind(this),
         end: done,
       },
