@@ -39,6 +39,36 @@ module.exports = {
       return 'webpack-src:///<%= name %>-example/' + path.relative('.', info.absoluteResourcePath);
     },
   },
+  module: {
+    loaders: [
+      // jade<% if (usesJade) { %>
+      { test: /\.jade$/, loader: 'jade-loader' },
+      // jade-end<% } %>
+      // es2015<% if (usesES2015) { %>
+      {
+        test: /\.(js|es6?)$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader',
+        query: { presets: ['es2015'] },
+      },
+      // es2015-end<% } %>
+      // react<% if (usesReact) { %>
+      {
+        test: /\.jsx$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader',
+        query: {
+          presets: [
+            'react',
+            // react&es2015<% if (usesES2015) { %>
+            'es2015',
+            // react&es2015-end<% } %>
+          ],
+        },
+      },
+      // react-end<% } %>
+    ],
+  },
   externals: [getExternals()],
   resolve: { alias: webpackAlias },
   devtool: 'source-map',

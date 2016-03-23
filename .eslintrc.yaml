@@ -11,3 +11,8 @@
     - 2
     - "always"
   "linebreak-style": 0
+  "no-unused-expressions":
+    - 2
+    -
+      allowShortCircuit: true
+      allowTernary: true

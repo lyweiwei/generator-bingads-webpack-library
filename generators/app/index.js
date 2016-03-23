@@ -76,6 +76,21 @@ module.exports = yeoman.generators.Base.extend({
       name: 'keywords',
       message: 'Keywords(comma to split)',
       default: pkgDest.keywords || '',
+    }, {
+      type: 'confirm',
+      name: 'usesJade',
+      message: 'Use Jade template',
+      default: true,
+    }, {
+      type: 'confirm',
+      name: 'usesES2015',
+      message: 'Use ES2015',
+      default: true,
+    }, {
+      type: 'confirm',
+      name: 'usesReact',
+      message: 'Use React',
+      default: false,
     }];
 
     this.prompt(prompts, function (props) {
@@ -127,9 +142,17 @@ module.exports = yeoman.generators.Base.extend({
   },
 
   install: function () {
-    this.npmInstall(dependencies.dev, {
-      saveDev: true,
-      link: true,
-    });
+    const depDev = dependencies.dev;
+
+    this.props.usesJade &&
+      depDev.push('jade', 'jade-loader');
+    (this.props.usesES2015 || this.props.usesReact) &&
+      depDev.push('babel-core', 'babel-loader');
+    this.props.usesES2015 &&
+      depDev.push('babel-preset-es2015');
+    this.props.usesReact &&
+      depDev.push('babel-preset-react');
+
+    this.npmInstall(depDev, { saveDev: true, link: true });
   },
 });
