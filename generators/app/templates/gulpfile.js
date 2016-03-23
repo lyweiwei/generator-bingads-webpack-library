@@ -73,7 +73,7 @@ gulp.task('static', function () {
 
 gulp.task('webpack', webpackBuild('./webpack.config'));
 
-gulp.task('example:webpack', ['webpack'], webpackBuild('./example/webpack/webpack.config'));
+gulp.task('example:webpack', ['webpack'], webpackBuild('./examples/webpack/webpack.config'));
 
 gulp.task('example:requirejs', function () {
   return file(
@@ -82,13 +82,13 @@ gulp.task('example:requirejs', function () {
       esprima.parse(
         'window.requirejs.config(' + JSON.stringify({
           paths: _.mapValues(pkg.peerDependencies, function (value, key) {
-            return path.relative('./example/requirejs', require.resolve(key)).replace(/\.js$/, '');
+            return path.relative('./examples/requirejs', require.resolve(key)).replace(/\.js$/, '');
           }),
         }) + ');'
       ),
       _.set({}, 'format.indent.style', '  ')
     )
-  ).pipe(gulp.dest('./example/requirejs/'));
+  ).pipe(gulp.dest('./examples/requirejs/'));
 });
 
 gulp.task('examples', ['example:webpack', 'example:requirejs']);
@@ -97,8 +97,8 @@ gulp.task('prepublish', ['webpack']);
 
 gulp.task('clean:examples', function () {
   return del([
-    'example/webpack/dist',
-    'example/requirejs/require.config.js',
+    'examples/webpack/dist',
+    'examples/requirejs/require.config.js',
   ]);
 });
 
