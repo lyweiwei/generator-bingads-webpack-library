@@ -7,6 +7,7 @@ module.exports = {
     'gulp',
     'gulp-eslint',
     'gulp-exclude-gitignore',
+    'gulp-file',
     'eslint',
     'eslint-config-xo',
     'eslint-config-xo-space',
@@ -22,5 +23,7 @@ module.exports = {
     'mocha',
     'chai',
     'istanbul-instrumenter-loader',
+    'escodegen',
+    'esprima',
   ],
 };

@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var url = require('url');
 var path = require('path');
 var pkg = require('./package');
 
@@ -28,7 +29,15 @@ module.exports = {
     library: '<%= name %>',
     libraryTarget: 'umd',
     umdNamedDefine: false,
-    devtoolModuleFilenameTemplate: 'webpack:///<%= name %>/[resource-path]',
+    devtoolModuleFilenameTemplate: function (info) {
+      var comps = url.parse(info.absoluteResourcePath);
+
+      if (comps.protocol) {
+        return info.absoluteResourcePath;
+      }
+
+      return 'webpack-src:///<%= name %>-example/' + path.relative('.', info.absoluteResourcePath);
+    },
   },
   externals: [getExternals()],
   resolve: { alias: webpackAlias },
