@@ -8,6 +8,7 @@ var file = require('gulp-file');
 var webpack = require('webpack');
 var esprima = require('esprima');
 var escodegen = require('escodegen');
+var del = require('del');
 
 var pkg = require('./package');
 
@@ -72,9 +73,9 @@ gulp.task('static', function () {
 
 gulp.task('webpack', webpackBuild('./webpack.config'));
 
-gulp.task('example-webpack', webpackBuild('./example/webpack/webpack.config'));
+gulp.task('example:webpack', ['webpack'], webpackBuild('./example/webpack/webpack.config'));
 
-gulp.task('example-requirejs', function () {
+gulp.task('example:requirejs', function () {
   return file(
     'require.config.js',
     escodegen.generate(
@@ -90,8 +91,25 @@ gulp.task('example-requirejs', function () {
   ).pipe(gulp.dest('./example/requirejs/'));
 });
 
-gulp.task('examples', ['example-webpack', 'example-requirejs']);
+gulp.task('examples', ['example:webpack', 'example:requirejs']);
 
 gulp.task('prepublish', ['webpack']);
+
+gulp.task('clean:examples', function () {
+  return del([
+    'example/webpack/dist',
+    'example/requirejs/require.config.js',
+  ]);
+});
+
+gulp.task('clean:test', function () {
+  return del(['coverage']);
+});
+
+gulp.task('clean:build', function () {
+  return del(['dist']);
+});
+
+gulp.task('clean', ['clean:build', 'clean:test', 'clean:examples']);
 
 gulp.task('default', ['static', 'webpack', 'examples']);
