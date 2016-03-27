@@ -1,3 +1,3 @@
-window.example = function (/* export of <%= name %> */) {
+require(['<%= name %>'], function (/* export of <%= name %> */) {
   // put your example code here
-};
+});

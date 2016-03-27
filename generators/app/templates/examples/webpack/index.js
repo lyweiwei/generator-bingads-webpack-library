@@ -1,1 +1,1 @@
-window.example(require('../../dist/<%= name %>'));
+require('../example');
