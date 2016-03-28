@@ -27,5 +27,6 @@ module.exports = {
     'istanbul-instrumenter-loader',
     'escodegen',
     'esprima',
+    'lodash',
   ],
 };
