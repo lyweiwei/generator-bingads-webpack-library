@@ -9,6 +9,7 @@ module.exports = {
     'gulp-eslint',
     'gulp-exclude-gitignore',
     'gulp-file',
+    'gulp-util',
     'del',
     'eslint',
     'eslint-config-xo',
