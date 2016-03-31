@@ -9,6 +9,7 @@ dist
 
 # npm logs
 node-debug.log
+npm-debug.log
 
 # generated code for example pages
 examples/requirejs/require.config.js

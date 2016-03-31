@@ -1,3 +1,3 @@
-require(['<%= name %>'], function (/* export of <%= name %> */) {
+require(['<%= name %>'], function (/* <%= nameCamel %> */) {
   // put your example code here
 });

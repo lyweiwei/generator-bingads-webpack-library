@@ -6,6 +6,7 @@ var yosay = require('yosay');
 var _ = require('lodash');
 var walk = require('walk');
 var path = require('path');
+var Promise = require('bluebird');
 var pkgStaticSrc = require('./package.static');
 var dependencies = require('./dependencies');
 
@@ -28,7 +29,18 @@ module.exports = yeoman.generators.Base.extend({
       'Welcome to the evolving ' + chalk.red('BingAds Webpack Library') + ' generator!'
     ));
 
-    var prompts = [{
+    this.props = {};
+
+    var prompt = function (questions) {
+      return new Promise(function (resolve/* , reject */) {
+        this.prompt(questions, function (props) {
+          _.assignIn(this.props, props);
+          resolve();
+        }.bind(this));
+      }.bind(this));
+    }.bind(this);
+
+    prompt([{
       type: 'input',
       name: 'name',
       message: 'Library name',
@@ -91,21 +103,35 @@ module.exports = yeoman.generators.Base.extend({
       name: 'usesReact',
       message: 'Use React',
       default: false,
-    }];
-
-    this.prompt(prompts, function (props) {
-      this.props = props;
-      // To access props later use this.props.someOption;
-
-      done();
-    }.bind(this));
+    }, {
+      type: 'confirm',
+      name: 'isOpenSource',
+      message: 'Is Open Source',
+      default: false,
+    }]).then(function () {
+      return this.props.isOpenSource && prompt([{
+        type: 'input',
+        name: 'githubOrg',
+        message: 'GitHub Org/User',
+        default: 'Microsoft',
+      }]);
+    }.bind(this)).then(function () {
+      this.props.nameCamel = _.chain(this.props.name)
+        .split('-')
+        .map(function (word, index) {
+          return index ? word[0].toUpperCase() + word.slice(1) : word;
+        })
+        .join('')
+        .value();
+      console.log(this.props.nameCamel);
+    }.bind(this)).then(done);
   },
 
   writing: function () {
     var done = this.async();
     var pathTemplateRoot = this.templatePath();
 
-    _.extend(this.pkgDest, {
+    _.assignIn(this.pkgDest, {
       name: this.props.name,
       description: this.props.description,
       keywords: _.chain(this.props.keywords).split(',').compact().uniq().value(),
@@ -115,6 +141,16 @@ module.exports = yeoman.generators.Base.extend({
         url: this.props.authorURL || undefined,
       },
     });
+
+    if (this.props.isOpenSource) {
+      _.assignIn(this.pkgDest, {
+        repository: {
+          type: 'git',
+          url: 'https://github.com/Microsoft/' + this.props.name + '.git',
+        },
+      });
+      this.pkgDest.scripts.test = 'gulp test coveralls';
+    }
 
     _.defaults(this.pkgDest, {
       main: 'dist/' + this.props.name + '.js',
@@ -152,6 +188,8 @@ module.exports = yeoman.generators.Base.extend({
       depDev.push('babel-preset-es2015');
     this.props.usesReact &&
       depDev.push('babel-preset-react');
+    this.props.isOpenSource &&
+      depDev.push('gulp-coveralls');
 
     this.npmInstall(depDev, { saveDev: true, link: true });
   },
