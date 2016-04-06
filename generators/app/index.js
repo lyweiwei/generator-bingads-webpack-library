@@ -20,6 +20,14 @@ function getSuggestedModuleName(originalName) {
 }
 
 module.exports = yeoman.generators.Base.extend({
+  constructor: function () {
+    yeoman.generators.Base.prototype.constructor.apply(this, arguments);
+
+    _.defaults(this.options, {
+      npmInstall: true,
+    });
+  },
+
   prompting: function () {
     var done = this.async();
     var pkgDest = this.pkgDest = this.fs.readJSON(this.destinationPath('package.json'), {});
@@ -131,6 +139,10 @@ module.exports = yeoman.generators.Base.extend({
     var done = this.async();
     var pathTemplateRoot = this.templatePath();
 
+    _.defaults(this.pkgDest, {
+      main: 'dist/' + this.props.name + '.js',
+    }, pkgStaticSrc);
+
     _.assignIn(this.pkgDest, {
       name: this.props.name,
       description: this.props.description,
@@ -151,10 +163,6 @@ module.exports = yeoman.generators.Base.extend({
       });
       this.pkgDest.scripts.test = 'gulp test coveralls';
     }
-
-    _.defaults(this.pkgDest, {
-      main: 'dist/' + this.props.name + '.js',
-    }, pkgStaticSrc);
 
     this.fs.writeJSON(this.destinationPath('package.json'), this.pkgDest);
 
@@ -191,6 +199,8 @@ module.exports = yeoman.generators.Base.extend({
     this.props.isOpenSource &&
       depDev.push('gulp-coveralls');
 
-    this.npmInstall(depDev, { saveDev: true, link: true });
+    if (this.options.npmInstall) {
+      this.npmInstall(depDev, { saveDev: true, link: true });
+    }
   },
 });
