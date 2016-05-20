@@ -1,21 +1,19 @@
-var _ = require('lodash');
+var fs = require('fs');
+var os = require('os');
+var http = require('http');
 var path = require('path');
+var childProcess = require('child_process');
+var resolve = require('resolve');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var eslint = require('gulp-eslint');
+var democase = require('gulp-democase');
 var excludeGitignore = require('gulp-exclude-gitignore');
-var file = require('gulp-file');
 var webpack = require('webpack');
-var esprima = require('esprima');
-var escodegen = require('escodegen');
 var del = require('del');
 // coveralls<% if (isOpenSource) { %>
 var coveralls = require('gulp-coveralls');
 // coveralls-end<% } %>
-
-var pkg = require('./package');
-
-var spawn = require('child_process').spawn;
 
 function webpackBuild(configFilePath) {
   return function (cb) {
@@ -24,6 +22,35 @@ function webpackBuild(configFilePath) {
       cb(err || stats.hasErrors() && new Error('webpack compile error'));
     });
   };
+}
+
+function getSeleniumFilePath() {
+  var SELENIUM_NAME = 'selenium-server-standalone-2.53.0.jar';
+  return path.resolve(os.tmpdir(), SELENIUM_NAME);
+}
+
+gulp.task('download-selenium', function (cb) {
+  var filePath = getSeleniumFilePath();
+  fs.stat(filePath, function (err) {
+    if (!err) {
+      return cb(null);
+    }
+    var file = fs.createWriteStream(filePath);
+    var URL = 'http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.0.jar';
+    http.get(URL, function (response) {
+      response.pipe(file);
+    });
+    file.on('error', function (err) {
+      fs.unlinkSync(filePath);
+      cb(err);
+    });
+    file.on('finish', cb);
+  });
+});
+
+function startSeleniumServer() {
+  var filePath = getSeleniumFilePath();
+  return childProcess.spawn('java', ['-jar', filePath], { stdio: 'inherit' });
 }
 
 //
@@ -36,7 +63,7 @@ function webpackBuild(configFilePath) {
 // var Server = require('karma').Server;
 //
 
-gulp.task('test', function (cb) {
+gulp.task('test:unit', function (cb) {
   var handler = function (code) {
     if (code) {
       cb(new Error('test failure'));
@@ -60,7 +87,7 @@ gulp.task('test', function (cb) {
     karmaCmd += '.cmd';
   }
 
-  spawn(karmaCmd, [
+  childProcess.spawn(karmaCmd, [
     'start',
     '--single-run',
   ], { stdio: 'inherit' }).on('close', handler);
@@ -87,35 +114,38 @@ gulp.task('static', function () {
 
 gulp.task('webpack', webpackBuild('./webpack.config'));
 
-gulp.task('example:webpack', ['webpack'], webpackBuild('./examples/webpack/webpack.config'));
-
-gulp.task('example:requirejs', function () {
-  return file(
-    'require.config.js',
-    escodegen.generate(
-      esprima.parse(
-        'var require = ' + JSON.stringify({
-          baseUrl: path.relative('examples/requirejs', '.'),
-          paths: _.defaults(_.mapValues(pkg.peerDependencies, function (value, key) {
-            return path.relative('.', require.resolve(key)).replace(/\.js$/, '');
-          }), { '<%= name %>': 'dist/<%= name %>' }),
-        }) + ';'
-      ),
-      _.set({}, 'format.indent.style', '  ')
-    )
-  ).pipe(gulp.dest('./examples/requirejs/'));
+gulp.task('demos', function () {
+  return gulp.src('./demos').pipe(democase());
 });
 
-gulp.task('examples', ['example:webpack', 'example:requirejs']);
+gulp.task('test:demos', ['download-selenium'], function (done) {
+  var pathCli = path.resolve(path.dirname(resolve.sync('webdriverio', {
+    basedir: '.',
+  })), 'lib/cli');
+  var cpSelenium = null;
+  var cpWdio = null;
+
+  cpSelenium = startSeleniumServer().on('error', function () {
+    if (cpWdio) {
+      cpWdio.kill();
+    }
+    done(new Error('Failed to launch the selenium standalone server. Make sure you have JRE available'));
+  });
+
+  cpWdio = childProcess.fork(pathCli, [path.join(__dirname, 'wdio.conf.js')], {
+    env: { DEMOCASE_HTTP_PORT: 8081 },
+  }).on('close', function (code) {
+    cpSelenium.kill();
+    if (code) {
+      done(new Error('selenium test failue'));
+    }
+    done();
+  });
+});
+
+gulp.task('test', ['test:unit', 'test:demos']);
 
 gulp.task('prepublish', ['webpack']);
-
-gulp.task('clean:examples', function () {
-  return del([
-    'examples/webpack/dist',
-    'examples/requirejs/require.config.js',
-  ]);
-});
 
 gulp.task('clean:test', function () {
   return del(['coverage']);
@@ -125,7 +155,7 @@ gulp.task('clean:build', function () {
   return del(['dist']);
 });
 
-gulp.task('clean', ['clean:build', 'clean:test', 'clean:examples']);
+gulp.task('clean', ['clean:build', 'clean:test']);
 
 gulp.task('default', [
   'static',
